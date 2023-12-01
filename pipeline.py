@@ -201,6 +201,8 @@ class Properties_of_EBs:
         #parameters that a user could change
         self.range = 0.05 #The fraction of the period to search for total flux
 
+        self.showPlots = True
+
     def download_lightcurve(self, tic_id):
         """Downloads the lightcurve for a given object. Returns the first table in the search result.
         Uses lightkurve package.
@@ -282,7 +284,7 @@ class Properties_of_EBs:
         left = (self.period/2.0) - (width/2.0)
         right = (self.period/2.0) + (width/2.0)
         self.flux_B = np.median(folded[np.where((folded>left) & (folded < right))])
-        self.flux_A = self.flux_tot - flux_B
+        self.flux_A = self.flux_tot - self.flux_B
         return self.flux_A, self.flux_B, self.flux_tot
     
     def distance_from_simbad(self, tic_id):
@@ -404,3 +406,6 @@ class Properties_of_EBs:
         self.M_B = mass_from_lum(self.lum_B)  
 
         self.pc_separation, self.au_separation = axis_from_masses(self.M_A, self.M_B, self.period)
+
+        if self.showPlots:
+            self.plot_lc(self.lightcurve_table)
