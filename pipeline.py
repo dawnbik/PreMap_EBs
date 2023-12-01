@@ -273,17 +273,19 @@ class Properties_of_EBs:
         """
         half_folded = self.lightcurve_table.time.value % (self.period/2.0)
         folded = self.lightcurve_table.time.value % self.period
+
+        flux=self.lightcurve_table.flux.value
        
         # find fractional range, gather datapoints, find median
         width = self.period * self.range # some value around 0.05?
         left = (self.period/4.0) - (width/2.0) # divisor 4 bc 1/2 * 1/2
         right = (self.period/4.0) + (width/2.0)
-        self.flux_tot = np.median(half_folded[np.where((folded>left) & (folded < right))])
+        self.flux_tot = np.median(flux[np.where((half_folded>left) & (half_folded < right))])
         
         # update left:right for full period
         left = (self.period/2.0) - (width/2.0)
         right = (self.period/2.0) + (width/2.0)
-        self.flux_B = np.median(folded[np.where((folded>left) & (folded < right))])
+        self.flux_B = np.median(flux[np.where((folded>left) & (folded < right))])
         self.flux_A = self.flux_tot - self.flux_B
         return self.flux_A, self.flux_B, self.flux_tot
     
