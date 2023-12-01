@@ -199,7 +199,7 @@ class Properties_of_EBs:
         self.data_table = data_table
 
         #parameters that a user could change
-        self.range = 0.05
+        self.range = 0.05 #The fraction of the period to search for total flux
 
     def download_lightcurve(self, tic_id):
         """Downloads the lightcurve for a given object. Returns the first table in the search result.
@@ -247,7 +247,7 @@ class Properties_of_EBs:
         self.period = self.data_table[np.where(self.data_table['Obj-ID'] == self.tic_id)]['BLS-Period']
         return self.period
 
-    def find_fluxes(self, lightcurve_table, period, range= self.range):
+    def find_fluxes(self, lightcurve_table, period):
         """Takes in a SearchResult object, the corresponding period, and desired fractional width, and returns a pair of fluxes for each object.
         Returns fluxes of the dimmer star, the brighter star, and total flux, in that order. Units will be preserved from the input objects.
 
