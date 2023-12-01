@@ -196,7 +196,7 @@ class Properties_of_EBs:
         self.tic_id = tic_id
         self.data_table = data_table
 
-    def download_lightcurve(self, self.tic_id):
+    def download_lightcurve(self, tic_id):
         """Downloads the lightcurve for a given object. Returns the first table in the search result.
         Uses lightkurve package.
         
@@ -209,13 +209,13 @@ class Properties_of_EBs:
         -------
         The first (index 0) SearchResult (lightkurve class) object containing data table from SPOC.
         """
-        search = lk.search_lightcurve(self.tic_id, author='SPOC')
+        search = lk.search_lightcurve(tic_id, author='SPOC')
 
         self.lightcurve_table = search[0].download()
         # search.table["dataURL"] = search.table["dataURI"]
         return self.lightcurve_table
     
-    def find_period(self, self.tic_id, self.data_table):
+    def find_period(self, tic_id, data_table):
         """Returns the period of the given object in days from the catalog.
         
         Parameters
@@ -233,7 +233,7 @@ class Properties_of_EBs:
         self.period = data[np.where(data['Obj-ID'] == self.tic_id)]['BLS-Period']
         return self.period
 
-    def find_fluxes(self, self.lightcurve_table, self.period, range=0.05):
+    def find_fluxes(self, lightcurve_table, period, range=0.05):
         """Takes in a SearchResult object, the corresponding period, and desired fractional width, and returns a pair of fluxes for each object.
         Returns fluxes of the dimmer star, the brighter star, and total flux, in that order. Units will be preserved from the input objects.
 
@@ -269,7 +269,7 @@ class Properties_of_EBs:
         self.flux_A = flux_tot - flux_B
         return self.flux_A, self.flux_B, self.flux_tot
     
-    def distance_from_simbad(self, self.tic_id):
+    def distance_from_simbad(self, tic_id):
         '''
         Finds the distance to the system using Simbad and the tic id.
         
@@ -296,7 +296,7 @@ class Properties_of_EBs:
         return self.distance
 
 
-    def Lum_from_Tess_Flux(self, Tess_flux, self.distance):
+    def Lum_from_Tess_Flux(self, Tess_flux, distance):
         """
         Take Flux values from TESS, and convert into intrinsic Luminosities.
     
@@ -345,7 +345,7 @@ class Properties_of_EBs:
         
         return mass*u.Msun
 
-    def axis_from_masses(self, mass_star1, mass_star2, self.period):
+    def axis_from_masses(self, mass_star1, mass_star2, period):
         '''
         Finds the semi-major axis of the orbit using the mass of both binary stars and the period of the system.
         
@@ -377,9 +377,9 @@ class Properties_of_EBs:
     
     def runAll(self):
         self.download_lightcurve(self.tic_id)
-        self.find_period(self.tic_id)
+        self.find_period(self.tic_id, self.data_table)
         self.distance_from_simbad(self.tic_id)
-        self.find_fluxes(self.lightcurve_table, self.data_table)
+        self.find_fluxes(self.lightcurve_table)
         
         self.lum_A = Lum_from_Tess_Flux(self.flux_A, self.distance)
         self.lum_B = Lum_from_Tess_Flux(self.flux_B, self.distance)
