@@ -275,6 +275,13 @@ class Properties_of_EBs:
         folded = self.lightcurve_table.time.value % self.period
 
         flux=self.lightcurve_table.flux.value
+
+        if self.showPlots:
+            fig=plt.fig
+            plt.scatter(folded/self.period, flux, color='green')
+            plt.xlabel('Phase', fontsize=16)
+            plt.ylabel('Flux [e/s]', fontsize=16)
+            plt.show()
        
         # find fractional range, gather datapoints, find median
         width = self.period * self.range # some value around 0.05?
