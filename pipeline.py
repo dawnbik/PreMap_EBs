@@ -5,10 +5,8 @@ from numpy import inf
 import matplotlib.pyplot as plt
 import lightkurve as lk
 from astroquery.simbad import Simbad
+from astropy import units as u
 
-data=ascii.read('rnaasac6e42t1_mrt.txt')
-
-ind_of_ids = np.array(5,6,10,11,17,18,19,27,36,45)
 
 Danbi Section
 def download_lightcurve(name):
