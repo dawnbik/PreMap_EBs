@@ -278,7 +278,7 @@ class Properties_of_EBs:
 
         if self.showPlots:
             fig=plt.figure()
-            plt.scatter(folded/self.period, flux, color='green')
+            plt.scatter(folded, flux, color='green')
             plt.xlabel('Phase', fontsize=16)
             plt.ylabel('Flux [e/s]', fontsize=16)
             plt.show()
