@@ -1,6 +1,24 @@
 Danbi Section
 
+def download_lightcurve(name):
+    """Downloads the lightcurve for a given object. Returns the first table in the search result.
+    Uses lightkurve package."""
+    search = lk.search_lightcurve(name)
+    # search.table["dataURL"] = search.table["dataURI"]
+    return search[0].download()
 
+# def find_period(table):
+#     """Returns the period of a binary system given the lightcurve. Uses LombScargle from astropy.timeseries"""
+#     freq, power = LombScargle(table.time.value, table.flux.value).autopower()
+#     max_power = np.max(power)
+#     freq_at_max_power = freq[np.argmax(power)]
+#     period = 1.0 / freq_at_max_power
+#     return period
+
+def find_period(name):
+    data = ascii.read('rnaasac6e42t1_mrt.txt')
+    period = data[name]['BLS-Period']
+    return period
 
 
 
