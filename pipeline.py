@@ -282,7 +282,7 @@ class Properties_of_EBs:
         left = (self.period/2.0) - (width/2.0)
         right = (self.period/2.0) + (width/2.0)
         self.flux_B = np.median(folded[np.where((folded>left) & (folded < right))])
-        self.flux_A = flux_tot - flux_B
+        self.flux_A = self.flux_tot - flux_B
         return self.flux_A, self.flux_B, self.flux_tot
     
     def distance_from_simbad(self, tic_id):
