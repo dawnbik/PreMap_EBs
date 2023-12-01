@@ -193,8 +193,13 @@ def axis_from_masses(mass_star1, mass_star2, period):
 
 class Properties_of_EBs:
     def __init__(self, tic_id, data_table):
+        
+        #required inputs
         self.tic_id = tic_id
         self.data_table = data_table
+
+        #parameters that a user could change
+        self.range = 0.05
 
     def download_lightcurve(self, tic_id):
         """Downloads the lightcurve for a given object. Returns the first table in the search result.
@@ -215,6 +220,15 @@ class Properties_of_EBs:
         # search.table["dataURL"] = search.table["dataURI"]
         return self.lightcurve_table
     
+    def plot_lc(self, lightcurve_table):
+        fig=plt.figure()
+        plt.title(self.lightcurve_table.label)
+        plt.scatter(self.lightcurve_table['time'].value, self.lightcurve_table['flux'].value, color='b')
+        plt.xlabel("Time [J Day]", fontsize=16)
+        plt.ylabel("Flux [e/s]", fontsize=16)
+        plt.show()
+        plt.close(fig)
+    
     def find_period(self, tic_id, data_table):
         """Returns the period of the given object in days from the catalog.
         
@@ -233,7 +247,7 @@ class Properties_of_EBs:
         self.period = self.data_table[np.where(self.data_table['Obj-ID'] == self.tic_id)]['BLS-Period']
         return self.period
 
-    def find_fluxes(self, lightcurve_table, period, range=0.05):
+    def find_fluxes(self, lightcurve_table, period, range):
         """Takes in a SearchResult object, the corresponding period, and desired fractional width, and returns a pair of fluxes for each object.
         Returns fluxes of the dimmer star, the brighter star, and total flux, in that order. Units will be preserved from the input objects.
 
@@ -257,15 +271,17 @@ class Properties_of_EBs:
         """
         half_folded = self.lightcurve_table.time.value % (self.period/2.0)
         folded = self.lightcurve_table.time.value % self.period
+       
         # find fractional range, gather datapoints, find median
-        width = self.period * range # some value around 0.05?
+        width = self.period * self.range # some value around 0.05?
         left = (self.period/4.0) - (width/2.0) # divisor 4 bc 1/2 * 1/2
         right = (self.period/4.0) + (width/2.0)
-        self.flux_tot = half_folded[left:right]
+        self.flux_tot = np.median(half_folded[left:right])
+        
         # update left:right for full period
         left = (self.period/2.0) - (width/2.0)
         right = (self.period/2.0) + (width/2.0)
-        self.flux_B = folded[left:right]
+        self.flux_B = np.median(folded[np.where((folded>left) & (folded < right))])
         self.flux_A = flux_tot - flux_B
         return self.flux_A, self.flux_B, self.flux_tot
     
