@@ -379,7 +379,7 @@ class Properties_of_EBs:
         self.download_lightcurve(self.tic_id)
         self.find_period(self.tic_id, self.data_table)
         self.distance_from_simbad(self.tic_id)
-        self.find_fluxes(self.lightcurve_table)
+        self.find_fluxes(self.lightcurve_table, self.period)
         
         self.lum_A = Lum_from_Tess_Flux(self.flux_A, self.distance)
         self.lum_B = Lum_from_Tess_Flux(self.flux_B, self.distance)
