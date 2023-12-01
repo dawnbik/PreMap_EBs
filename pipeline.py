@@ -247,7 +247,7 @@ class Properties_of_EBs:
         self.period = self.data_table[np.where(self.data_table['Obj-ID'] == self.tic_id)]['BLS-Period']
         return self.period
 
-    def find_fluxes(self, lightcurve_table, period, range):
+    def find_fluxes(self, lightcurve_table, period, range=self.range):
         """Takes in a SearchResult object, the corresponding period, and desired fractional width, and returns a pair of fluxes for each object.
         Returns fluxes of the dimmer star, the brighter star, and total flux, in that order. Units will be preserved from the input objects.
 
