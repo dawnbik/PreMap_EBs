@@ -230,7 +230,7 @@ class Properties_of_EBs:
         period : float
                 Orbital period (in days)"""
         
-        self.period = data[np.where(data['Obj-ID'] == self.tic_id)]['BLS-Period']
+        self.period = self.data_table[np.where(self.data_table['Obj-ID'] == self.tic_id)]['BLS-Period']
         return self.period
 
     def find_fluxes(self, lightcurve_table, period, range=0.05):
