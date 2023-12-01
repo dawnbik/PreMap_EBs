@@ -8,7 +8,7 @@ from astroquery.simbad import Simbad
 from astropy import units as u
 
 
-Danbi Section
+#Danbi Section
 def download_lightcurve(name):
     """Downloads the lightcurve for a given object. Returns the first table in the search result.
     Uses lightkurve package.
@@ -86,9 +86,7 @@ def find_fluxes(search, period, range):
     return flux_A, flux_B, flux_tot
 
 
-
-
-Amelia Section
+#Amelia Section
 def distance_from_simbad(tic_id):
     '''
     Finds the distance to the system using Simbad and the tic id.
