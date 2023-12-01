@@ -1,3 +1,6 @@
+
+ind_of_ids = np.array(5,6,10,11,17,18,19,27,36,45)
+
 Danbi Section
 
 def download_lightcurve(name):
