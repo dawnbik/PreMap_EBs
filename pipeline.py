@@ -7,6 +7,7 @@ import lightkurve as lk
 from astroquery.simbad import Simbad
 from astropy import units as u
 from scipy.signal import argrelextrema
+from astropy import constants as ac
 
 
 #Danbi Section
@@ -193,16 +194,17 @@ def axis_from_masses(mass_star1, mass_star2, period):
 
 
 class Properties_of_EBs:
-    def __init__(self, tic_id, data_table):
+    def __init__(self, tic_id, data_table, dip_finder_step_size):
         
         #required inputs
         self.tic_id = tic_id
         self.data_table = data_table
+        self.dip_finder_step_size = dip_finder_step_size
 
         #parameters that a user could change
-        self.range = 0.02 #The fraction of the period to search for total flux
+        self.range = 0.04 #The fraction of the period to search for total flux
         self.first_dip= None
-
+        self.dip_times= None
         self.showPlots = True
 
     def download_lightcurve(self, tic_id):
@@ -233,7 +235,7 @@ class Properties_of_EBs:
         plt.show()
         plt.close(fig)
 
-    def find_first_transit(self, data_table):
+    def find_first_transit(self, lightcurve_table, dip_finder_step_size):
         """Returns the indices of the first large dip.
         
         Parameters
@@ -245,19 +247,26 @@ class Properties_of_EBs:
         -------
         ind : int
                 integer time step where the first large dip occurs"""
-        t=data_table.time.value
-        f=data_table.flux.value
+        t=self.lightcurve_table.time.value
+        f=self.lightcurve_table.flux.value
 
         nt=t[(~np.isnan(np.array(f)))]
         nf=f[(~np.isnan(np.array(f)))]
 
         # Order 2 looks at more than just the immediate numbers around a variable
-        mins = argrelextrema(np.array(nf), np.less, order=50)[0]
+        mins = argrelextrema(np.array(nf), np.less, order=self.dip_finder_step_size)[0]
         
+        self.dip_times = nt[mins]
+
         if self.showPlots:
-            plt.scatter(nt,nf)
-            plt.scatter(nt[mins], nf[mins], marker='*', color='r')
+            fig=plt.figure()
+            plt.title(self.lightcurve_table.label)
+            plt.scatter(self.lightcurve_table['time'].value, self.lightcurve_table['flux'].value, color='b', s=2)
+            plt.scatter(nt[mins], nf[mins], marker='*', color='r', s=75)
+            plt.xlabel("Time [J Day]", fontsize=16)
+            plt.ylabel("Flux [e/s]", fontsize=16)
             plt.show()
+            plt.close(fig)
         
         if nf[mins[0]] < nf[mins[1]]:
             self.first_dip = nt[mins[0]]
@@ -281,7 +290,7 @@ class Properties_of_EBs:
         period : float
                 Orbital period (in days)"""
         
-        self.period = self.data_table[np.where(self.data_table['Obj-ID'] == self.tic_id)]['BLS-Period']
+        self.period = self.data_table[np.where(self.data_table['Obj-ID'] == self.tic_id)]['Use_Period']
         return self.period
 
     def find_fluxes(self, lightcurve_table, period):
@@ -326,11 +335,22 @@ class Properties_of_EBs:
             plt.ylabel('Flux [e/s]', fontsize=16)
             plt.show()
             plt.close(fig)
+
+
+            # fig2=plt.figure()
+            # plt.scatter(half_folded /self.period, nf, color='green', s=2)
+            # plt.xlabel('Half Phase', fontsize=16)
+            # plt.ylabel('Flux [e/s]', fontsize=16)
+            # plt.show()
+            # plt.close(fig2)
        
-        left = 0.5 - self.range
-        right = 0.5 + self.range
+        left = 0.25 - self.range
+        right = 0.25 + self.range
         self.flux_tot = np.median(nf[np.where((half_folded_phase>left) & (half_folded_phase < right))])
         
+
+        left = 0.5 - self.range
+        right = 0.5 + self.range
         self.flux_B = np.median(nf[np.where((phase > left) & (phase < right))])
         self.flux_A = self.flux_tot - self.flux_B
         return self.flux_A, self.flux_B, self.flux_tot
@@ -444,7 +464,7 @@ class Properties_of_EBs:
     def runAll(self):
         self.download_lightcurve(self.tic_id)
         self.find_period(self.tic_id, self.data_table)
-        self.find_first_transit(self.data_table)
+        self.find_first_transit(self.data_table, self.dip_finder_step_size)
         self.distance_from_simbad(self.tic_id)
         self.find_fluxes(self.lightcurve_table, self.period)
         
@@ -455,6 +475,3 @@ class Properties_of_EBs:
         self.M_B = mass_from_lum(self.lum_B)  
 
         self.pc_separation, self.au_separation = axis_from_masses(self.M_A, self.M_B, self.period)
-
-        if self.showPlots:
-            self.plot_lc(self.lightcurve_table)
