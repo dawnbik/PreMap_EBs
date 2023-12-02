@@ -260,9 +260,9 @@ class Properties_of_EBs:
             plt.show()
         
         if nf[mins[0]] < nf[mins[1]]:
-            self.first_dip = nf[mins[0]]
+            self.first_dip = nt[mins[0]]
         if nf[mins[0]] > nf[mins[1]]:
-            self.first_dip = nf[mins[1]]
+            self.first_dip = nt[mins[1]]
         
 
     
