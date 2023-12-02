@@ -311,17 +311,17 @@ class Properties_of_EBs:
         nt=self.lightcurve_table.time.value[(~np.isnan(np.array(flux)))]
         nf=flux[(~np.isnan(np.array(flux)))]
 
-        half_folded = (nt%(self.period/2.0))
+        half_folded = ((nt-self.first_dip)%(self.period/2.0))
 
-        half_folded_phase = (nt%(self.period/2.0))/self.period
+        half_folded_phase = ((nt-self.first_dip)%(self.period/2.0))/self.period
 
-        folded = (nt%self.period)
+        folded = ((nt-self.first_dip)%self.period)
 
-        phase = (nt%self.period)/self.period
+        phase = ((nt-self.first_dip)%self.period)/self.period
 
         if self.showPlots:
             fig=plt.figure()
-            plt.scatter((folded-self.first_dip) /self.period, nf, color='green', s=2)
+            plt.scatter(folded /self.period, nf, color='green', s=2)
             plt.xlabel('Phase', fontsize=16)
             plt.ylabel('Flux [e/s]', fontsize=16)
             plt.show()
