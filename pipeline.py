@@ -200,7 +200,7 @@ class Properties_of_EBs:
         self.data_table = data_table
 
         #parameters that a user could change
-        self.range = 0.05 #The fraction of the period to search for total flux
+        self.range = 0.02 #The fraction of the period to search for total flux
         self.first_dip= None
 
         self.showPlots = True
@@ -331,7 +331,7 @@ class Properties_of_EBs:
         right = 0.5 + self.range
         self.flux_tot = np.median(nf[np.where((half_folded_phase>left) & (half_folded_phase < right))])
         
-        self.flux_B = np.median(flux[np.where((phase > left) & (phase < right))])
+        self.flux_B = np.median(nf[np.where((phase > left) & (phase < right))])
         self.flux_A = self.flux_tot - self.flux_B
         return self.flux_A, self.flux_B, self.flux_tot
     
