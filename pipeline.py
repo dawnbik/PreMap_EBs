@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import lightkurve as lk
 from astroquery.simbad import Simbad
 from astropy import units as u
+from scipy.signal import argrelextrema
 
 
 #Danbi Section
@@ -200,6 +201,7 @@ class Properties_of_EBs:
 
         #parameters that a user could change
         self.range = 0.05 #The fraction of the period to search for total flux
+        self.first_dip= None
 
         self.showPlots = True
 
@@ -230,6 +232,39 @@ class Properties_of_EBs:
         plt.ylabel("Flux [e/s]", fontsize=16)
         plt.show()
         plt.close(fig)
+
+    def find_first_transit(self, data_table):
+        """Returns the indices of the first large dip.
+        
+        Parameters
+        ----------
+        data_table : string
+                table of systems we are searching for
+        
+        Returns
+        -------
+        ind : int
+                integer time step where the first large dip occurs"""
+        t=data_table.time.value
+        f=data_table.flux.value
+
+        nt=t[(~np.isnan(np.array(f)))]
+        nf=f[(~np.isnan(np.array(f)))]
+
+        # Order 2 looks at more than just the immediate numbers around a variable
+        mins = argrelextrema(np.array(nf), np.less, order=50)[0]
+        
+        if self.showPlots:
+            plt.scatter(nt,nf)
+            plt.scatter(nt[mins], nf[mins], marker='*', color='r')
+            plt.show()
+        
+        if nf[mins[0]] < nf[mins[1]]:
+            self.first_dip = nf[mins[0]]
+        if nf[mins[0]] > nf[mins[1]]:
+            self.first_dip = nf[mins[1]]
+        
+
     
     def find_period(self, tic_id, data_table):
         """Returns the period of the given object in days from the catalog.
@@ -271,29 +306,32 @@ class Properties_of_EBs:
         flux_tot : float32
                 total flux of the system, in units of electrons per seconds.
         """
-        half_folded = self.lightcurve_table.time.value % (self.period/2.0)
-        folded = self.lightcurve_table.time.value % self.period
-
         flux=self.lightcurve_table.flux.value
+
+        nt=self.lightcurve_table.time.value[(~np.isnan(np.array(flux)))]
+        nf=flux[(~np.isnan(np.array(flux)))]
+
+        half_folded = (nt%(self.period/2.0))
+
+        half_folded_phase = (nt%(self.period/2.0))/self.period
+
+        folded = (nt%self.period)
+
+        phase = (nt%self.period)/self.period
 
         if self.showPlots:
             fig=plt.figure()
-            plt.scatter(folded, flux, color='green')
+            plt.scatter((folded-self.first_dip) /self.period, nf, color='green', s=2)
             plt.xlabel('Phase', fontsize=16)
             plt.ylabel('Flux [e/s]', fontsize=16)
             plt.show()
             plt.close(fig)
        
-        # find fractional range, gather datapoints, find median
-        width = self.period * self.range # some value around 0.05?
-        left = (self.period/4.0) - (width/2.0) # divisor 4 bc 1/2 * 1/2
-        right = (self.period/4.0) + (width/2.0)
-        self.flux_tot = np.median(flux[np.where((half_folded>left) & (half_folded < right))])
+        left = 0.5 - self.range
+        right = 0.5 + self.range
+        self.flux_tot = np.median(nf[np.where((half_folded_phase>left) & (half_folded_phase < right))])
         
-        # update left:right for full period
-        left = (self.period/2.0) - (width/2.0)
-        right = (self.period/2.0) + (width/2.0)
-        self.flux_B = np.median(flux[np.where((folded>left) & (folded < right))])
+        self.flux_B = np.median(flux[np.where((phase > left) & (phase < right))])
         self.flux_A = self.flux_tot - self.flux_B
         return self.flux_A, self.flux_B, self.flux_tot
     
@@ -406,6 +444,7 @@ class Properties_of_EBs:
     def runAll(self):
         self.download_lightcurve(self.tic_id)
         self.find_period(self.tic_id, self.data_table)
+        self.find_first_transit(self.data_table)
         self.distance_from_simbad(self.tic_id)
         self.find_fluxes(self.lightcurve_table, self.period)
         
